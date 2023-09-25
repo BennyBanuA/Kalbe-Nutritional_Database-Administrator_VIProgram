@@ -15,6 +15,8 @@ CREATE DATABASE kalbe
 	
 CREATE SCHEMA app;
 
+-- Create Table Product --
+
 CREATE TABLE app.Product(
 	"Product_Id" serial PRIMARY KEY,
 	"Nama_Produk" varchar(255) NOT NULL
@@ -25,7 +27,8 @@ FROM '/Users/BENI/Documents/project/RakaminxKalbe/product.csv' DELIMITER ';' CSV
 
 SELECT*FROM app.product
 
--------------------------
+-- Create Table Shipments --
+
 CREATE TABLE app.Shipments (
     "Shipment_ID" serial PRIMARY KEY,
 	"Store_Destination" varchar(255) NOT NULL,
@@ -50,7 +53,7 @@ SELECT*FROM app.Shipments
 
 CREATE INDEX idx_SendingTime ON app.Shipments ("Sending_Time");
 
--------------------------------------------------------------
+-- Create Table ShipmentDetails --
 CREATE TABLE app.ShipmentDetails (
     "ShipmentDetailID" serial PRIMARY KEY,
     "Shipment_ID" integer REFERENCES app.Shipments ("Shipment_ID"),
@@ -82,7 +85,7 @@ ORDER BY
     "Jumlah_Pengiriman" DESC
 LIMIT 2;
 
---- 2 ---
+--- Menampilkan 10 Barang Paling Sering Dikirim pada bulan Mei 2023 ---
 SELECT
     app.Product."Nama_Produk",
     SUM("Qty") AS "Total_Pengiriman"
@@ -101,7 +104,7 @@ ORDER BY
     "Total_Pengiriman" DESC
 LIMIT 10;
 
----- 3 ----
+---- Menampilkan semua pengiriman yang belum selesai ----
 SELECT * FROM app.Shipments
 WHERE "DeliveredTime" IS NULL;
 
@@ -113,7 +116,7 @@ GRANT USAGE ON SCHEMA app TO backend_user;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA app TO backend_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO backend_user;
 
-
+-- User Defined Function --
 CREATE OR REPLACE FUNCTION generate_shipment_id()
 RETURNS integer AS $$
 DECLARE
@@ -204,7 +207,7 @@ BEGIN
 END;
 $$;
 
--- get all data -- 
+-- Function GetAllData -- 
 CREATE OR REPLACE FUNCTION GetAllData()
 RETURNS TABLE (
     "Product_Id" integer,
@@ -252,13 +255,3 @@ BEGIN
         app.Product as p ON sd."Product_Id" = p."Product_Id";
 END;
 $$ LANGUAGE plpgsql;
-
-
-SELECT * FROM GetAllData();
-
-COPY (SELECT * FROM GetAllData()) TO 'C:\\Users\\BENI\\Documents\\project\\RakaminxKalbe\\backup_file.csv' WITH CSV HEADER;
-
-
-DROP FUNCTION IF EXISTS GetAllData();
-
-
